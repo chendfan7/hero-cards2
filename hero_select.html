@@ -36,6 +36,7 @@
             color: var(--text-primary);
         }
 
+        /* ===== 左侧职业分类导航 ===== */
         .sidebar {
             width: 90px;
             background: var(--bg-panel);
@@ -99,6 +100,7 @@
             color: var(--text-muted);
         }
 
+        /* ===== 主内容区 ===== */
         .main-content {
             flex: 1;
             display: flex;
@@ -106,6 +108,7 @@
             background: linear-gradient(180deg, #0d1424 0%, #0a0e1a 100%);
         }
 
+        /* ===== 顶部导航栏 ===== */
         .top-nav {
             height: 50px;
             display: flex;
@@ -161,6 +164,7 @@
             font-size: 10px;
         }
 
+        /* ===== 英雄列表区 ===== */
         .hero-section {
             flex: 1;
             padding: 24px;
@@ -186,6 +190,7 @@
             color: var(--text-muted);
         }
 
+        /* ===== 陀螺仪卡片画廊 ===== */
         .gallery-container {
             flex: 1;
             display: flex;
@@ -263,6 +268,7 @@
             z-index: 2;
         }
 
+        /* ===== 双卡叠加效果 ===== */
         .stacked .card-back {
             transform: translateZ(-25px) translateX(20px) translateY(-20px);
             z-index: 1;
@@ -280,6 +286,7 @@
             border-color: rgba(240, 195, 84, 0.7);
         }
 
+        /* ===== 右侧详情面板 ===== */
         .detail-panel {
             width: 320px;
             background: var(--bg-panel);
@@ -355,6 +362,7 @@
     </style>
 </head>
 <body>
+    <!-- 左侧职业分类导航 -->
     <div class="sidebar">
         <div class="nav-item active">
             <div class="icon">◎</div>
@@ -393,7 +401,9 @@
         </div>
     </div>
 
+    <!-- 主内容区 -->
     <div class="main-content">
+        <!-- 顶部导航栏 -->
         <div class="top-nav">
             <div class="tab active">英雄</div>
             <div class="tab">阵营</div>
@@ -409,6 +419,7 @@
             </div>
         </div>
 
+        <!-- 英雄列表区 -->
         <div class="hero-section">
             <div class="section-header">
                 <div class="section-title">推荐英雄</div>
@@ -417,6 +428,8 @@
 
             <div class="gallery-container">
                 <div class="gallery" id="gallery">
+                    <!-- 第一行 -->
+                    <!-- 双卡叠加结构 - 孙悟空 -->
                     <div class="card-wrapper stacked" id="stacked-wrapper">
                         <div class="card card-back" style="background-image: url('3016709.png');">
                             <div class="card-title">孙悟空</div>
@@ -428,6 +441,7 @@
                         </div>
                     </div>
 
+                    <!-- 阿轲 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('3011604.png');">
                             <div class="card-title">阿轲</div>
@@ -435,6 +449,7 @@
                         </div>
                     </div>
 
+                    <!-- 艾琳 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('3012707.png');">
                             <div class="card-title">艾琳</div>
@@ -442,6 +457,7 @@
                         </div>
                     </div>
 
+                    <!-- 敖隐 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('3013203.png');">
                             <div class="card-title">敖隐</div>
@@ -449,6 +465,7 @@
                         </div>
                     </div>
 
+                    <!-- 韩信 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('301050.png');">
                             <div class="card-title">韩信</div>
@@ -456,6 +473,7 @@
                         </div>
                     </div>
 
+                    <!-- 李白 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('301051.png');">
                             <div class="card-title">李白</div>
@@ -463,6 +481,7 @@
                         </div>
                     </div>
 
+                    <!-- 第二行 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('301061.png');">
                             <div class="card-title">赵云</div>
@@ -505,6 +524,7 @@
                         </div>
                     </div>
 
+                    <!-- 第三行 -->
                     <div class="card-wrapper">
                         <div class="card card-front" style="background-image: url('301100.png');">
                             <div class="card-title">貂蝉</div>
@@ -551,6 +571,7 @@
         </div>
     </div>
 
+    <!-- 右侧详情面板 -->
     <div class="detail-panel">
         <div class="detail-header">
             <div class="hero-name">孙悟空</div>
@@ -588,6 +609,14 @@
         <button id="skip-btn" style="background: transparent; border: 1px solid #444; color: #888; font-size: 13px; padding: 10px 30px; border-radius: 6px; cursor: pointer; margin-top: 16px;">跳过（使用触控）</button>
     </div>
 
+    <!-- 调试信息 -->
+    <div id="debug-info" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; font-size: 11px; padding: 10px; border-radius: 6px; z-index: 10000; font-family: monospace; max-width: 300px;">
+        <div>检测中...</div>
+    </div>
+
+    <!-- 触控指示器 -->
+    <div id="touch-hint" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(240, 195, 84, 0.9); color: #0a0e1a; font-size: 12px; padding: 8px 16px; border-radius: 20px; z-index: 100;">拖动手指移动卡片</div>
+
     <script>
         const wrappers = document.querySelectorAll('.card-wrapper');
         const backCard = document.querySelector('.stacked .card-back');
@@ -595,6 +624,7 @@
         const permissionDiv = document.getElementById('gyro-permission');
         const grantBtn = document.getElementById('grant-btn');
         const skipBtn = document.getElementById('skip-btn');
+        const touchHint = document.getElementById('touch-hint');
 
         let gyroEnabled = false;
         let touchEnabled = false;
@@ -611,6 +641,7 @@
                 wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             });
 
+            // 双卡叠加的视差放大
             if (backCard) {
                 const baseZ = -25;
                 const baseX = 20;
@@ -632,8 +663,9 @@
             }
         }
 
+        // 桌面端鼠标移动模拟
         window.addEventListener('mousemove', (e) => {
-            if (touchEnabled || gyroEnabled) return;
+            if (touchEnabled || gyroEnabled) return; // 移动端优先
             
             const rect = gallery.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
@@ -648,12 +680,14 @@
             );
         });
 
+        // 鼠标移出时恢复原状
         window.addEventListener('mouseout', () => {
             if (!touchEnabled && !gyroEnabled) {
                 updateTilt(0, 0);
             }
         });
 
+        // ===== Safari / iOS 陀螺仪权限请求 =====
         function isIOS() {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -665,6 +699,7 @@
         }
 
         async function requestGyroPermission() {
+            // iOS 13+ 需要显式请求权限
             if (typeof DeviceOrientationEvent !== 'undefined' && 
                 typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
@@ -678,6 +713,7 @@
                     return false;
                 }
             } else {
+                // 非 iOS 或旧版 iOS，直接启用
                 enableGyro();
                 return true;
             }
@@ -692,9 +728,12 @@
                 if (!gyroEnabled) return;
                 
                 if (e.gamma !== null && e.beta !== null) {
-                    // 横屏模式：交换 X/Y 并调整方向
-                    let normX = (e.beta - 45) / 30;  // 左右：用 beta
-                    let normY = -e.gamma / 30;       // 前后：用 gamma，取反
+                    // 横屏模式，Home键在右侧
+                    // gamma: -90(左倾) ~ 0(平) ~ 90(右倾)
+                    // beta: 0(垂直) ~ 90(水平) ~ 180(倒置)
+                    
+                    let normX = e.gamma / 20;        // 左右：gamma，放大灵敏度
+                    let normY = (e.beta - 90) / 20;  // 前后：beta-90，放大灵敏度
 
                     normX = Math.max(-1, Math.min(1, normX));
                     normY = Math.max(-1, Math.min(1, normY));
@@ -707,6 +746,12 @@
         function enableTouch() {
             touchEnabled = true;
             permissionDiv.style.display = 'none';
+            touchHint.style.display = 'block';
+            
+            setTimeout(() => {
+                touchHint.style.opacity = '0';
+                setTimeout(() => touchHint.style.display = 'none', 500);
+            }, 2000);
 
             let lastX = 0, lastY = 0;
             let currentNormX = 0, currentNormY = 0;
@@ -726,12 +771,14 @@
                 lastX = touch.clientX;
                 lastY = touch.clientY;
 
+                // 累积偏移，限制范围
                 currentNormX = Math.max(-1, Math.min(1, currentNormX + deltaX * 0.005));
                 currentNormY = Math.max(-1, Math.min(1, currentNormY + deltaY * 0.005));
 
                 updateTilt(currentNormX, currentNormY);
             }, { passive: true });
 
+            // 惯性回弹
             gallery.addEventListener('touchend', () => {
                 function inertiaBack() {
                     if (Math.abs(currentNormX) < 0.01 && Math.abs(currentNormY) < 0.01) {
@@ -749,37 +796,69 @@
             });
         }
 
+        // 调试输出
+        const debugInfo = document.getElementById('debug-info');
+        function log(msg) {
+            debugInfo.innerHTML += '<div>' + msg + '</div>';
+            console.log(msg);
+        }
+
+        log('UA: ' + navigator.userAgent.substring(0, 50));
+        log('isMobile: ' + isMobile());
+        log('isIOS: ' + isIOS());
+        log('DeviceOrientationEvent: ' + (typeof DeviceOrientationEvent !== 'undefined'));
+        log('requestPermission: ' + (typeof DeviceOrientationEvent?.requestPermission === 'function'));
+
+        // 检测是否需要显示权限请求
         if (isMobile()) {
             if (isIOS() && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ 需要显示权限请求界面
+                log('显示权限弹窗 (iOS 13+)');
                 permissionDiv.style.display = 'flex';
             } else if (isIOS()) {
+                // 旧版 iOS，检测是否有陀螺仪
+                log('旧版 iOS，尝试陀螺仪...');
                 window.addEventListener('deviceorientation', function testGyro(e) {
+                    log('收到陀螺仪数据: gamma=' + e.gamma);
                     if (e.gamma !== null && e.beta !== null) {
                         window.removeEventListener('deviceorientation', testGyro);
                         enableGyro();
+                        log('陀螺仪已启用');
                     }
                 });
+                // 1秒后如果还没响应，显示权限界面
                 setTimeout(() => {
                     if (!gyroEnabled) {
+                        log('超时，显示弹窗');
                         permissionDiv.style.display = 'flex';
                     }
                 }, 1000);
             } else {
+                // Android 等其他设备，直接尝试启用
+                log('Android/其他设备');
                 window.addEventListener('deviceorientation', (e) => {
                     if (e.gamma !== null && e.beta !== null) {
                         enableGyro();
+                        log('陀螺仪已启用');
                     }
                 });
+                // 同时支持触控作为备选
                 setTimeout(() => {
-                    if (!gyroEnabled) enableTouch();
+                    if (!gyroEnabled) {
+                        log('启用触控备选');
+                        enableTouch();
+                    }
                 }, 1000);
             }
+        } else {
+            log('桌面设备，使用鼠标');
         }
 
+        // 权限按钮事件
         grantBtn.addEventListener('click', async () => {
             const success = await requestGyroPermission();
             if (!success) {
-                enableTouch();
+                enableTouch(); // 权限失败时启用触控
             }
         });
 
@@ -787,6 +866,7 @@
             enableTouch();
         });
 
+        // 左侧导航点击事件
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -794,6 +874,7 @@
             });
         });
 
+        // 顶部标签点击事件
         document.querySelectorAll('.top-nav .tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.top-nav .tab').forEach(t => t.classList.remove('active'));
