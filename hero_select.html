@@ -600,10 +600,29 @@
         </div>
     </div>
 
+    <!-- Safari 陀螺仪权限提示 -->
+    <div id="gyro-permission" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: -apple-system, sans-serif;">
+        <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
+        <div style="font-size: 20px; margin-bottom: 12px;">启用陀螺仪效果</div>
+        <div style="font-size: 14px; color: #888; margin-bottom: 30px; text-align: center; padding: 0 40px;">点击下方按钮授权使用设备陀螺仪<br>体验卡片跟随倾斜的 3D 效果</div>
+        <button id="grant-btn" style="background: linear-gradient(135deg, #f0c354, #b8943f); border: none; color: #0a0e1a; font-size: 16px; font-weight: 600; padding: 14px 40px; border-radius: 8px; cursor: pointer;">启用陀螺仪</button>
+        <button id="skip-btn" style="background: transparent; border: 1px solid #444; color: #888; font-size: 13px; padding: 10px 30px; border-radius: 6px; cursor: pointer; margin-top: 16px;">跳过（使用触控）</button>
+    </div>
+
+    <!-- 触控指示器 -->
+    <div id="touch-hint" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(240, 195, 84, 0.9); color: #0a0e1a; font-size: 12px; padding: 8px 16px; border-radius: 20px; z-index: 100;">拖动手指移动卡片</div>
+
     <script>
         const wrappers = document.querySelectorAll('.card-wrapper');
         const backCard = document.querySelector('.stacked .card-back');
         const gallery = document.getElementById('gallery');
+        const permissionDiv = document.getElementById('gyro-permission');
+        const grantBtn = document.getElementById('grant-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const touchHint = document.getElementById('touch-hint');
+
+        let gyroEnabled = false;
+        let touchEnabled = false;
 
         // 核心倾斜逻辑计算
         function updateTilt(normX, normY) {
@@ -641,6 +660,8 @@
 
         // 桌面端鼠标移动模拟
         window.addEventListener('mousemove', (e) => {
+            if (touchEnabled || gyroEnabled) return; // 移动端优先
+            
             const rect = gallery.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
@@ -656,20 +677,159 @@
 
         // 鼠标移出时恢复原状
         window.addEventListener('mouseout', () => {
-            updateTilt(0, 0);
+            if (!touchEnabled && !gyroEnabled) {
+                updateTilt(0, 0);
+            }
         });
 
-        // 移动端真实陀螺仪
-        window.addEventListener('deviceorientation', (e) => {
-            if (e.gamma !== null && e.beta !== null) {
-                let normX = e.gamma / 45;
-                let normY = (e.beta - 45) / 45;
+        // ===== Safari / iOS 陀螺仪权限请求 =====
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
 
-                normX = Math.max(-1, Math.min(1, normX));
-                normY = Math.max(-1, Math.min(1, normY));
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
 
-                updateTilt(normX, normY);
+        async function requestGyroPermission() {
+            // iOS 13+ 需要显式请求权限
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    if (permission === 'granted') {
+                        enableGyro();
+                        return true;
+                    }
+                } catch (e) {
+                    console.error('陀螺仪权限请求失败:', e);
+                    return false;
+                }
+            } else {
+                // 非 iOS 或旧版 iOS，直接启用
+                enableGyro();
+                return true;
             }
+            return false;
+        }
+
+        function enableGyro() {
+            gyroEnabled = true;
+            permissionDiv.style.display = 'none';
+            
+            window.addEventListener('deviceorientation', (e) => {
+                if (!gyroEnabled) return;
+                
+                if (e.gamma !== null && e.beta !== null) {
+                    let normX = e.gamma / 45;
+                    let normY = (e.beta - 45) / 45;
+
+                    normX = Math.max(-1, Math.min(1, normX));
+                    normY = Math.max(-1, Math.min(1, normY));
+
+                    updateTilt(normX, normY);
+                }
+            });
+        }
+
+        function enableTouch() {
+            touchEnabled = true;
+            permissionDiv.style.display = 'none';
+            touchHint.style.display = 'block';
+            
+            setTimeout(() => {
+                touchHint.style.opacity = '0';
+                setTimeout(() => touchHint.style.display = 'none', 500);
+            }, 2000);
+
+            let lastX = 0, lastY = 0;
+            let currentNormX = 0, currentNormY = 0;
+
+            gallery.addEventListener('touchstart', (e) => {
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            }, { passive: true });
+
+            gallery.addEventListener('touchmove', (e) => {
+                if (!touchEnabled) return;
+                
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - lastX;
+                const deltaY = touch.clientY - lastY;
+                
+                lastX = touch.clientX;
+                lastY = touch.clientY;
+
+                // 累积偏移，限制范围
+                currentNormX = Math.max(-1, Math.min(1, currentNormX + deltaX * 0.005));
+                currentNormY = Math.max(-1, Math.min(1, currentNormY + deltaY * 0.005));
+
+                updateTilt(currentNormX, currentNormY);
+            }, { passive: true });
+
+            // 惯性回弹
+            gallery.addEventListener('touchend', () => {
+                function inertiaBack() {
+                    if (Math.abs(currentNormX) < 0.01 && Math.abs(currentNormY) < 0.01) {
+                        currentNormX = 0;
+                        currentNormY = 0;
+                        updateTilt(0, 0);
+                        return;
+                    }
+                    currentNormX *= 0.92;
+                    currentNormY *= 0.92;
+                    updateTilt(currentNormX, currentNormY);
+                    requestAnimationFrame(inertiaBack);
+                }
+                requestAnimationFrame(inertiaBack);
+            });
+        }
+
+        // 检测是否需要显示权限请求
+        if (isMobile()) {
+            if (isIOS() && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ 需要显示权限请求界面
+                permissionDiv.style.display = 'flex';
+            } else if (isIOS()) {
+                // 旧版 iOS，检测是否有陀螺仪
+                window.addEventListener('deviceorientation', function testGyro(e) {
+                    if (e.gamma !== null && e.beta !== null) {
+                        window.removeEventListener('deviceorientation', testGyro);
+                        enableGyro();
+                    }
+                });
+                // 3秒后如果还没响应，显示权限界面
+                setTimeout(() => {
+                    if (!gyroEnabled) {
+                        permissionDiv.style.display = 'flex';
+                    }
+                }, 1000);
+            } else {
+                // Android 等其他设备，直接尝试启用
+                window.addEventListener('deviceorientation', (e) => {
+                    if (e.gamma !== null && e.beta !== null) {
+                        enableGyro();
+                    }
+                });
+                // 同时支持触控作为备选
+                setTimeout(() => {
+                    if (!gyroEnabled) enableTouch();
+                }, 1000);
+            }
+        }
+
+        // 权限按钮事件
+        grantBtn.addEventListener('click', async () => {
+            const success = await requestGyroPermission();
+            if (!success) {
+                enableTouch(); // 权限失败时启用触控
+            }
+        });
+
+        skipBtn.addEventListener('click', () => {
+            enableTouch();
         });
 
         // 左侧导航点击事件
