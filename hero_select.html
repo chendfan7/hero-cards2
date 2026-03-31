@@ -588,11 +588,6 @@
         <button id="skip-btn" style="background: transparent; border: 1px solid #444; color: #888; font-size: 13px; padding: 10px 30px; border-radius: 6px; cursor: pointer; margin-top: 16px;">跳过（使用触控）</button>
     </div>
 
-    <!-- 调试信息 -->
-    <div id="debug-info" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; font-size: 11px; padding: 10px; border-radius: 6px; z-index: 10000; font-family: monospace; max-width: 300px;">
-        <div>检测中...</div>
-    </div>
-
     <script>
         const wrappers = document.querySelectorAll('.card-wrapper');
         const backCard = document.querySelector('.stacked .card-back');
@@ -604,9 +599,10 @@
         let gyroEnabled = false;
         let touchEnabled = false;
 
+        // 核心倾斜逻辑计算
         function updateTilt(normX, normY) {
-            const maxRotationX = 8;
-            const maxRotationY = 12;
+            const maxRotationX = 20;  // 增大：8 → 20
+            const maxRotationY = 30;  // 增大：12 → 30
 
             const rotateX = -normY * maxRotationX;
             const rotateY = normX * maxRotationY;
@@ -696,8 +692,9 @@
                 if (!gyroEnabled) return;
                 
                 if (e.gamma !== null && e.beta !== null) {
-                    let normX = e.gamma / 45;
-                    let normY = (e.beta - 45) / 45;
+                    // 横屏模式：交换 X/Y 并调整方向
+                    let normX = (e.beta - 45) / 30;  // 左右：用 beta
+                    let normY = -e.gamma / 30;       // 前后：用 gamma，取反
 
                     normX = Math.max(-1, Math.min(1, normX));
                     normY = Math.max(-1, Math.min(1, normY));
@@ -752,68 +749,41 @@
             });
         }
 
-        const debugInfo = document.getElementById('debug-info');
-        function log(msg) {
-            debugInfo.innerHTML += '<div>' + msg + '</div>';
-            console.log(msg);
-        }
-
-        log('UA: ' + navigator.userAgent.substring(0, 50));
-        log('isMobile: ' + isMobile());
-        log('isIOS: ' + isIOS());
-        log('DeviceOrientationEvent: ' + (typeof DeviceOrientationEvent !== 'undefined'));
-        log('requestPermission: ' + (typeof DeviceOrientationEvent?.requestPermission === 'function'));
-
         if (isMobile()) {
             if (isIOS() && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                log('显示权限弹窗 (iOS 13+)');
                 permissionDiv.style.display = 'flex';
             } else if (isIOS()) {
-                log('旧版 iOS，尝试陀螺仪...');
                 window.addEventListener('deviceorientation', function testGyro(e) {
-                    log('收到陀螺仪数据: gamma=' + e.gamma);
                     if (e.gamma !== null && e.beta !== null) {
                         window.removeEventListener('deviceorientation', testGyro);
                         enableGyro();
-                        log('陀螺仪已启用');
                     }
                 });
                 setTimeout(() => {
                     if (!gyroEnabled) {
-                        log('超时，显示弹窗');
                         permissionDiv.style.display = 'flex';
                     }
                 }, 1000);
             } else {
-                log('Android/其他设备');
                 window.addEventListener('deviceorientation', (e) => {
                     if (e.gamma !== null && e.beta !== null) {
                         enableGyro();
-                        log('陀螺仪已启用');
                     }
                 });
                 setTimeout(() => {
-                    if (!gyroEnabled) {
-                        log('启用触控备选');
-                        enableTouch();
-                    }
+                    if (!gyroEnabled) enableTouch();
                 }, 1000);
             }
-        } else {
-            log('桌面设备，使用鼠标');
         }
 
         grantBtn.addEventListener('click', async () => {
-            log('点击启用陀螺仪');
             const success = await requestGyroPermission();
-            log('权限结果: ' + success);
             if (!success) {
                 enableTouch();
             }
         });
 
         skipBtn.addEventListener('click', () => {
-            log('跳过，启用触控');
             enableTouch();
         });
 
