@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>陀螺仪英雄卡片特效模拟</title>
+    <style>
+        :root {
+            --card-width: 180px;
+            --card-height: 300px;
+            --bg-color: #0b1120;
+            --gold-accent: #f0c354;
+        }
+        
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, #1a2a47 0%, #0b1120 70%);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin: 0 0 10px 0;
+            color: #e2e8f0;
+        }
+        
+        p.subtitle {
+            margin: 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .gallery {
+            display: flex;
+            gap: 40px;
+            /* 设定整个场景的透视点，让3D效果更自然 */
+            perspective: 1200px; 
+            padding: 40px;
+        }
+
+        .card-wrapper {
+            width: var(--card-width);
+            height: var(--card-height);
+            position: relative;
+            /* 保留内部子元素的3D层级 */
+            transform-style: preserve-3d;
+            /* 平滑过渡动画，使用缓动曲线更具弹性 */
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            /* 默认阴影和边框 */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 15px;
+            box-sizing: border-box;
+            overflow: hidden;
+            /* 处理图片性能 */
+            will-change: transform;
+        }
+
+        /* 底部半透明遮罩，使文字更清晰 */
+        .card::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0; height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+        }
+
+        .card-title {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            margin: 0;
+        }
+        
+        .card-tag {
+            position: relative;
+            z-index: 2;
+            font-size: 12px;
+            color: var(--gold-accent);
+            margin-top: 4px;
+        }
+
+        /* ----- 单卡效果 ----- */
+        /* 普通卡片略微向前浮动 */
+        .card-front {
+            transform: translateZ(20px);
+            z-index: 2;
+        }
+
+        /* ----- 双卡叠加效果 (核心) ----- */
+        .stacked .card-back {
+            /* 初始状态：推到后方，稍微向右偏移，略微缩小（透视效果），并降低亮度 */
+            transform: translateZ(-30px) translateX(25px) translateY(-10px);
+            z-index: 1;
+            filter: brightness(0.55);
+            /* 叠加卡片使用金边，凸显特殊性 */
+            border: 1px solid rgba(240, 195, 84, 0.4);
+            transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.3s ease;
+        }
+        
+        /* 交互反馈 */
+        .card-wrapper:hover .card-front {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 150, 255, 0.3);
+        }
+        
+        .stacked:hover .card-back {
+            border-color: rgba(240, 195, 84, 0.8);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>英雄阵容展示</h1>
+        <p class="subtitle">电脑端移动鼠标 / 手机端晃动设备以体验陀螺仪 3D 景深与叠卡视差效果</p>
+    </div>
+
+    <div class="gallery" id="gallery">
+        
+        <!-- 双卡叠加结构 -->
+        <div class="card-wrapper stacked" id="stacked-wrapper">
+            <!-- 背面卡片 (默认漏出一点边缘) -->
+            <div class="card card-back" style="background-image: url('3016709.png');">
+                <div class="card-title">孙悟空</div>
+                <div class="card-tag">♦ 经典皮肤</div>
+            </div>
+            <!-- 正面卡片 -->
+            <div class="card card-front" style="background-image: url('3016700.PNG');">
+                <div class="card-title">孙悟空</div>
+                <div class="card-tag">♦ 地狱火</div>
+            </div>
+        </div>
+
+        <!-- 普通单卡结构 -->
+        <div class="card-wrapper">
+            <div class="card card-front" style="background-image: url('3011604.png');">
+                <div class="card-title">阿轲</div>
+                <div class="card-tag">♦ 致命风华</div>
+            </div>
+        </div>
+
+        <div class="card-wrapper">
+            <div class="card card-front" style="background-image: url('3012707.png');">
+                <div class="card-title">艾琳</div>
+                <div class="card-tag">♦ 女武神</div>
+            </div>
+        </div>
+        
+        <div class="card-wrapper">
+            <div class="card card-front" style="background-image: url('3013203.png');">
+                <div class="card-title">敖隐</div>
+                <div class="card-tag">♦ 龙年限定</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const wrappers = document.querySelectorAll('.card-wrapper');
+        const backCard = document.querySelector('.stacked .card-back');
+
+        // 核心倾斜逻辑计算
+        function updateTilt(normX, normY) {
+            // 最大旋转角度
+            const maxRotationX = 12; 
+            const maxRotationY = 16; 
+
+            // 计算基础旋转：上下(Y轴鼠标)对应X轴旋转，左右(X轴鼠标)对应Y轴旋转
+            const rotateX = -normY * maxRotationX;
+            const rotateY = normX * maxRotationY;
+
+            // 1. 让所有卡片容器独立发生 3D 旋转
+            wrappers.forEach(wrapper => {
+                wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            // 2. 特殊逻辑：双卡叠加的视差放大
+            if (backCard) {
+                // 背面卡的初始位移
+                const baseZ = -30;
+                const baseX = 25;
+                const baseY = -10;
+                
+                // 视差乘数（决定后方卡片滑出的夸张程度）
+                // 陀螺仪往左倾斜(normX < 0)，背景卡向右平移更多来露出
+                // 陀螺仪往右倾斜(normX > 0)，背景卡向左收回
+                const parallaxMultiplierX = -25; 
+                const parallaxMultiplierY = -15; 
+                
+                const finalX = baseX + (normX * parallaxMultiplierX);
+                const finalY = baseY + (normY * parallaxMultiplierY);
+
+                // 根据倾斜角度微调亮度，倾斜越多背面越亮
+                const brightness = 0.55 + Math.abs(normX) * 0.25;
+
+                // 应用最终的 Transform 变形
+                backCard.style.transform = `
+                    translateZ(${baseZ}px) 
+                    translateX(${finalX}px) 
+                    translateY(${finalY}px)
+                `;
+                backCard.style.filter = `brightness(${brightness})`;
+            }
+        }
+
+        // ==========================================
+        // 事件监听：桌面端鼠标移动模拟
+        // ==========================================
+        window.addEventListener('mousemove', (e) => {
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // 归一化坐标到 [-1, 1] 范围
+            const normX = (e.clientX - centerX) / centerX;
+            const normY = (e.clientY - centerY) / centerY;
+            
+            updateTilt(normX, normY);
+        });
+
+        // 鼠标移出屏幕时恢复原状
+        window.addEventListener('mouseout', () => {
+            updateTilt(0, 0);
+        });
+
+        // ==========================================
+        // 事件监听：移动端真实陀螺仪 (DeviceOrientation)
+        // ==========================================
+        window.addEventListener('deviceorientation', (e) => {
+            if (e.gamma !== null && e.beta !== null) {
+                // gamma 表示左右倾斜度 (-90 到 90)
+                // beta 表示前后倾斜度 (-180 到 180)
+                // 大致归一化到 [-1, 1]，45度作为一个基准倾斜
+                let normX = e.gamma / 45; 
+                let normY = (e.beta - 45) / 45; // 假设设备日常手持斜度为45度
+                
+                // 限制在 [-1, 1] 区间
+                normX = Math.max(-1, Math.min(1, normX));
+                normY = Math.max(-1, Math.min(1, normY));
+                
+                updateTilt(normX, normY);
+            }
+        });
+    </script>
+</body>
+</html>
