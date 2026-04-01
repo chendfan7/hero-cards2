@@ -762,8 +762,8 @@
                     // gamma: -90(左倾) ~ 0(平) ~ 90(右倾)
                     // beta: 0(垂直) ~ 90(水平) ~ 180(倒置)
                     
-                    let normX = e.gamma / 20;        // 左右：gamma，放大灵敏度
-                    let normY = (e.beta - 90) / 20;  // 前后：beta-90，放大灵敏度
+                    let normX = e.gamma / 12;          // 左右：gamma，放大灵敏度 (20→12)
+                    let normY = -(e.beta - 90) / 20;   // 前后：beta-90，取反修正方向
 
                     normX = Math.max(-1, Math.min(1, normX));
                     normY = Math.max(-1, Math.min(1, normY));
