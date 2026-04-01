@@ -2,7 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="full-screen" content="yes">
     <title>英雄选择界面</title>
     <style>
         * {
@@ -600,6 +603,19 @@
         </div>
     </div>
 
+    <!-- 竖屏提示 -->
+    <div id="rotate-hint" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0a0e1a; z-index: 99999; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: -apple-system, sans-serif;">
+        <div style="font-size: 64px; margin-bottom: 20px; animation: rotate-hint 1.5s ease-in-out infinite;">📱</div>
+        <div style="font-size: 18px; margin-bottom: 8px;">请旋转设备至横屏模式</div>
+        <div style="font-size: 14px; color: #666;">以获得最佳体验</div>
+    </div>
+    <style>
+        @keyframes rotate-hint {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+    </style>
+
     <!-- Safari 陀螺仪权限提示 -->
     <div id="gyro-permission" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; font-family: -apple-system, sans-serif;">
         <div style="font-size: 48px; margin-bottom: 20px;">📱</div>
@@ -609,12 +625,7 @@
         <button id="skip-btn" style="background: transparent; border: 1px solid #444; color: #888; font-size: 13px; padding: 10px 30px; border-radius: 6px; cursor: pointer; margin-top: 16px;">跳过（使用触控）</button>
     </div>
 
-    <!-- 调试信息 -->
-    <div id="debug-info" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #0f0; font-size: 11px; padding: 10px; border-radius: 6px; z-index: 10000; font-family: monospace; max-width: 300px;">
-        <div>检测中...</div>
-    </div>
 
-    <!-- 触控指示器 -->
     <div id="touch-hint" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(240, 195, 84, 0.9); color: #0a0e1a; font-size: 12px; padding: 8px 16px; border-radius: 20px; z-index: 100;">拖动手指移动卡片</div>
 
     <script>
@@ -625,9 +636,24 @@
         const grantBtn = document.getElementById('grant-btn');
         const skipBtn = document.getElementById('skip-btn');
         const touchHint = document.getElementById('touch-hint');
+        const rotateHint = document.getElementById('rotate-hint');
 
         let gyroEnabled = false;
         let touchEnabled = false;
+
+        // 检测屏幕方向
+        function checkOrientation() {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            if (isLandscape) {
+                rotateHint.style.display = 'none';
+            } else {
+                rotateHint.style.display = 'flex';
+            }
+        }
+        
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        checkOrientation();
 
         // 核心倾斜逻辑计算
         function updateTilt(normX, normY) {
